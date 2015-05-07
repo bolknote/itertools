@@ -450,11 +450,32 @@ function tee(\Iterator $iterable, $n = 2)
 	return $result;
 }
 
-$things = [["animal", "bear"], ["animal", "duck"], ["plant", "cactus"], ["vehicle", "speed boat"], ["vehicle", "school bus"]];
 
-foreach (groupby(iter($things), function ($x) { return $x[0]; }) as list($key, $group)) {
-    foreach ($group as $thing) {
-        printf("A %s is a %s.\n",  $thing[1], $key);
-    }
-    echo "\n";
+$letter = iter(['', 1, 2, 3, '', '', '', '', 4, '', '']);
+
+function ntrim($letter, $n = 3, $replby = 1)
+{
+    $ntrim_inner = function ($letter, $n, $replby) {
+        foreach (groupby(chain(iter(['', '', '']), $letter, iter(['', '', '']))) as list($item, $grp)) {
+            $item = (bool) $item;
+            $grp  = iterator_to_array($grp);
+
+            yield $item || sizeof($grp) < $n ? iter($grp) : iter(['']);
+        }
+    };
+
+    return array_slice(iterator_to_array(chain(...$ntrim_inner($letter, $n, $replby))), $replby, -$replby);
 }
+
+echo json_encode(ntrim($letter));
+
+// def ntrim(letter, n=3, replby=1):
+//     return list(
+//             chain(
+//                 *(
+//                     [[''], grp][item or len(grp)<n]
+//                         for item, grp in ((bool(item), list(grp))
+//                             for item, grp in groupby(chain(['']*n, letter, ['']*n), lambda x:x))
+//                 )
+//                 )
+//         )[replby:-replby]
