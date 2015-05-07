@@ -7,7 +7,10 @@
 
 Пример использования:
 
-    foreach (islice(cycle(iter('ABC')), 10) as $element) {
+    require 'itertools.php';
+    use itertools as it;
+
+    foreach (it\islice(it\cycle(it\iter('ABC')), 10) as $element) {
         echo $element;
     }
 
