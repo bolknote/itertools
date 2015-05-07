@@ -192,8 +192,41 @@ function dropwhile(callable $predicate, \Iterator $iterable)
     }
 }
 
-function groupby(\Iterator $iterable, $key = null)
+function groupby(\Iterator $it, callable $keyfunc = null)
 {
+    $tgtkey = $currkey = $currvalue = (object) [];
+
+    $grouper = function ($tgtkey) use (&$currkey, &$currvalue, $keyfunc, $it) {
+        while ($currkey == $tgtkey) {
+            yield $currvalue;
+
+            if (!$it->valid()) {
+                return;
+            }
+
+            $currvalue = $it->current();
+            $it->next();
+
+            $currkey = $keyfunc === null ? $currvalue : $keyfunc($currvalue);
+        }
+    };
+
+    for (;;) {
+        while ($currkey === $tgtkey) {
+            if (!$it->valid()) {
+                return;
+            }
+
+            $currvalue = $it->current();
+            $it->next();
+
+            $currkey = $keyfunc === null ? $currvalue : $keyfunc($currvalue);
+        }
+
+        $tgtkey = $currkey;
+
+        yield [$currkey, $grouper($tgtkey)];
+    }
 }
 
 function ifilter(callable $predicate = null, \Iterator $iterable)
@@ -417,17 +450,11 @@ function tee(\Iterator $iterable, $n = 2)
 	return $result;
 }
 
-// var_dump(iterator_to_array(islice(cycle(new \ArrayIterator([1, 2, 3])), 2)));
+$things = [["animal", "bear"], ["animal", "duck"], ["plant", "cactus"], ["vehicle", "speed boat"], ["vehicle", "school bus"]];
 
-// foreach (product(2, new \ArrayIterator(['A', 'B', 'C']), new \ArrayIterator(['x', 'y'])) as $element) {
-
-foreach (permutations(iter('ABCD'), 2) as $element) {
-    echo '(', implode(', ', $element), ")\n";
-    // var_dump($element);
+foreach (groupby(iter($things), function ($x) { return $x[0]; }) as list($key, $group)) {
+    foreach ($group as $thing) {
+        printf("A %s is a %s.\n",  $thing[1], $key);
+    }
+    echo "\n";
 }
-
-// foreach (chain(iter('ABC'), iter('DEF')) as $element) {
-// 	print_r($element);
-// }
-
-// var_dump(iterator_to_array(xrange(10, 11, -1)));
