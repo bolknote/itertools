@@ -4,13 +4,13 @@
 Реализованы все функции, для запуска требуется PHP 5.6 и выше.
 
 Пример использования:
+```php
+require 'itertools.php';
+use function itertools\islice, itertools\cycle;
 
-    require 'itertools.php';
-    use function itertools\islice, itertools\cycle;
-
-    foreach (islice(cycle('ABC'), 10) as $element) {
-        echo $element;
-    }
-
+foreach (islice(cycle('ABC'), 10) as $element) {
+    echo $element;
+}
+```
 По сравнению с пакетом itertools, реализованы стандартные для Пайтона функции
 `slice`, `enumerate`, `iter` и `xrange`.
