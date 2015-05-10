@@ -19,11 +19,11 @@ function slice($start_or_stop, $stop = PHP_INT_MAX, $step = 1)
     ];
 }
 
-function enumerate(\Iterator $iterable, $start = 0)
+function enumerate($iterable, $start = 0)
 {
     $n = $start;
 
-    foreach ($iterable as $value) {
+    foreach (iter($iterable) as $value) {
         yield [$n, $value];
         $n++;
     }
@@ -38,11 +38,12 @@ function iter($var)
         case $var instanceof \Traversable:
         	return new \IteratorIterator($var);
 
+        case is_string($var):
+            $var = str_split($var);
+            /* проваливаемся */
+
         case is_array($var):
             return new \ArrayIterator($var);
-
-        case is_string($var):
-            return new \ArrayIterator(str_split($var));
 
         default:
             $type = gettype($var);
@@ -67,27 +68,27 @@ function xrange($start_or_stop, $stop = PHP_INT_MAX, $step = 1)
     }
 }
 
-function chain(\Iterator ...$iterables)
+function chain(...$iterables)
 {
     foreach ($iterables as $it) {
-        foreach ($it as $element) {
+        foreach (iter($it) as $element) {
             yield $element;
         }
     }
 }
 
-function from_iterable(\Iterator $iterables)
+function from_iterable($iterables)
 {
-    foreach ($iterables as $it) {
-        foreach ($it as $element) {
+    foreach (iter($iterables) as $it) {
+        foreach (iter($it) as $element) {
             yield $element;
         }
     }
 }
 
-function combinations(\Iterator $iterable, $r)
+function combinations($iterable, $r)
 {
-	$pool = iterator_to_array($iterable);
+	$pool = is_array($iterable) ? $iterable : iterator_to_array(iter($iterable));
 	$n = sizeof($pool);
 
 	if ($r > $n) {
@@ -123,9 +124,9 @@ function combinations(\Iterator $iterable, $r)
 	}
 }
 
-function combinations_with_replacement(\Iterator $iterable, $r)
+function combinations_with_replacement($iterable, $r)
 {
-	$pool = iterator_to_array($iterable);
+	$pool = is_array($iterable) ? $iterable : iterator_to_array(iter($iterable));
 	$n = sizeof($pool);
 
 	if (!$n && $r) {
@@ -173,13 +174,15 @@ function count($start = 0, $step = 1)
     }
 }
 
-function cycle(\Iterator $iterable)
+function cycle($iterable)
 {
-    return new \InfiniteIterator($iterable);
+    return new \InfiniteIterator(iter($iterable));
 }
 
-function dropwhile(callable $predicate, \Iterator $iterable)
+function dropwhile(callable $predicate, $iterable)
 {
+    $iterable = iter($iterable);
+
     foreach ($iterable as $x) {
         if (!$predicate($x)) {
             yield $x;
@@ -192,8 +195,9 @@ function dropwhile(callable $predicate, \Iterator $iterable)
     }
 }
 
-function groupby(\Iterator $it, callable $keyfunc = null)
+function groupby($it, callable $keyfunc = null)
 {
+    $it = iter($it);
     $tgtkey = $currkey = $currvalue = (object) [];
 
     $grouper = function ($tgtkey) use (&$currkey, &$currvalue, $keyfunc, $it) {
@@ -229,33 +233,33 @@ function groupby(\Iterator $it, callable $keyfunc = null)
     }
 }
 
-function ifilter(callable $predicate = null, \Iterator $iterable)
+function ifilter(callable $predicate = null, $iterable)
 {
     if ($predicate === null) {
         $predicate = 'boolval';
     }
 
-    foreach ($iterable as $x) {
+    foreach (iter($iterable) as $x) {
         if ($predicate($x)) {
             yield $x;
         }
     }
 }
 
-function ifilterfalse(callable $predicate = null, \Iterator $iterable)
+function ifilterfalse(callable $predicate = null, $iterable)
 {
     if ($predicate === null) {
         $predicate = 'boolval';
     }
 
-    foreach ($iterable as $x) {
+    foreach (iter($iterable) as $x) {
         if (!$predicate($x)) {
             yield $x;
         }
     }
 }
 
-function imap(callable $function = null, \Iterator ...$iterables)
+function imap(callable $function = null, ...$iterables)
 {
 	foreach (izip(...$iterables) as $args) {
 		if ($function === null) {
@@ -266,7 +270,7 @@ function imap(callable $function = null, \Iterator ...$iterables)
 	}
 }
 
-function islice(\Iterator $iterable, ...$args)
+function islice($iterable, ...$args)
 {
     if (slice(...$args)->step < 1) {
         throw new \InvalidArgumentException('Step for islice() must be a positive integer or null.');
@@ -291,19 +295,21 @@ function islice(\Iterator $iterable, ...$args)
     }
 }
 
-function izip(\Iterator ...$iterables)
+function izip(...$iterables)
 {
 	$multipleIterator = new \MultipleIterator();
 	foreach ($iterables as $iterable) {
-		$multipleIterator->attachIterator($iterable);
+		$multipleIterator->attachIterator(iter($iterable));
 	}
 
 	return $multipleIterator;
 }
 
-function izip_longest($fillvalue = null, \Iterator ...$iterables)
+function izip_longest(/* ...$iterables[, $fillvalue = null] */ ...$args)
 {
-	$counter = func_num_args() - 1;
+    $fillvalue = array_pop($args);
+	$counter   = sizeof($args);
+    $iterables = array_map('iter', $args);
 
 	$sentinel = function() use (&$counter, $fillvalue) {
 		$counter--;
@@ -336,9 +342,9 @@ function izip_longest($fillvalue = null, \Iterator ...$iterables)
 	}
 }
 
-function permutations(\Iterator $iterable, $r = null)
+function permutations($iterable, $r = null)
 {
-	$pool = iterator_to_array($iterable);
+	$pool = is_array($iterable) ? $iterable : iterator_to_array(iter($iterable));
 	$n = sizeof($pool);
 	$r = $r === null ? $n : $r;
 
@@ -381,8 +387,11 @@ function permutations(\Iterator $iterable, $r = null)
 	}
 }
 
-function product($repeat, \Iterator ...$iterables)
+function product(/*...$iterables[, $repeat = 1]*/ ...$args)
 {
+    $repeat = array_pop($args);
+    $iterables = array_map('iter', $args);
+
     $pools = array_merge(...array_fill(0, $repeat, $iterables));
     $result = [[]];
 
@@ -416,16 +425,16 @@ function repeat($object, $times = null)
     }
 }
 
-function starmap(callable $function, \Iterator $iterable)
+function starmap(callable $function, $iterable)
 {
-    foreach ($iterable as $args) {
+    foreach (iter($iterable) as $args) {
         yield $function(...$args);
     }
 }
 
-function takewhile(callable $predicate, \Iterator $iterable)
+function takewhile(callable $predicate, $iterable)
 {
-    foreach ($iterable as $x) {
+    foreach (iter($iterable) as $x) {
         if ($predicate($x)) {
             yield $x;
         } else {
@@ -434,9 +443,9 @@ function takewhile(callable $predicate, \Iterator $iterable)
     }
 }
 
-function tee(\Iterator $iterable, $n = 2)
+function tee($iterable, $n = 2)
 {
-	$it = new \CachingIterator($iterable, \CachingIterator::FULL_CACHE);
+	$it = new \CachingIterator(iter($iterable), \CachingIterator::FULL_CACHE);
 	$result = [$it];
 
 	for ($i = 1; $i<$n; $i++) {
