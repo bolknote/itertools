@@ -305,10 +305,10 @@ function izip(...$iterables)
 	return $multipleIterator;
 }
 
-function izip_longest(/* ...$iterables[, $fillvalue = null] */ ...$args)
+function izip_longest(/* ...$iterables[, $fillvalue] */ ...$args)
 {
     $fillvalue = array_pop($args);
-	$counter   = sizeof($args);
+    $counter   = sizeof($args);
     $iterables = array_map('iter', $args);
 
 	$sentinel = function() use (&$counter, $fillvalue) {
@@ -387,7 +387,7 @@ function permutations($iterable, $r = null)
 	}
 }
 
-function product(/*...$iterables[, $repeat = 1]*/ ...$args)
+function product(/*...$iterables[, $repeat]*/ ...$args)
 {
     $repeat = array_pop($args);
     $iterables = array_map('iter', $args);
