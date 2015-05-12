@@ -1,4 +1,7 @@
-<?php #5.6
+<?php
+
+#5.6
+
 
 namespace itertools;
 
@@ -36,7 +39,7 @@ function iter($var)
             return $var;
 
         case $var instanceof \Traversable:
-        	return new \IteratorIterator($var);
+            return new \IteratorIterator($var);
 
         case is_string($var):
             $var = str_split($var);
@@ -53,7 +56,7 @@ function iter($var)
 
 function xrange($start_or_stop, $stop = PHP_INT_MAX, $step = 1)
 {
-    $args = call_user_func_array('itertools\\slice', func_get_args());
+    $args = call_user_func_array(__NAMESPACE__.'\\slice', func_get_args());
 
     if ($args->step == 0) {
         throw new \InvalidArgumentException('xrange() arg 3 must not be zero');
@@ -88,74 +91,74 @@ function from_iterable($iterables)
 
 function combinations($iterable, $r)
 {
-	$pool = is_array($iterable) ? $iterable : iterator_to_array(iter($iterable));
-	$n = sizeof($pool);
+    $pool = is_array($iterable) ? $iterable : iterator_to_array(iter($iterable));
+    $n = sizeof($pool);
 
-	if ($r > $n) {
-		return;
-	}
+    if ($r > $n) {
+        return;
+    }
 
-	$indices = range(0, $r-1);
-	yield array_slice($pool, 0, $r);
+    $indices = range(0, $r - 1);
+    yield array_slice($pool, 0, $r);
 
-	for (;;) {
-		for (;;) {
-			for ($i = $r - 1; $i >= 0; $i--) {
-				if ($indices[$i] != $i + $n - $r) {
-					break 2;
-				}
-			}
+    for (;;) {
+        for (;;) {
+            for ($i = $r - 1; $i >= 0; $i--) {
+                if ($indices[$i] != $i + $n - $r) {
+                    break 2;
+                }
+            }
 
-			return;
-		}
+            return;
+        }
 
-		$indices[$i]++;
+        $indices[$i]++;
 
-		for ($j = $i + 1; $j < $r; $j++) {
-			$indices[$j] = $indices[$j - 1] + 1;
-		}
+        for ($j = $i + 1; $j < $r; $j++) {
+            $indices[$j] = $indices[$j - 1] + 1;
+        }
 
-		$row = [];
-		foreach ($indices as $i) {
-			$row[] = $pool[$i];
-		}
+        $row = [];
+        foreach ($indices as $i) {
+            $row[] = $pool[$i];
+        }
 
-		yield $row;
-	}
+        yield $row;
+    }
 }
 
 function combinations_with_replacement($iterable, $r)
 {
-	$pool = is_array($iterable) ? $iterable : iterator_to_array(iter($iterable));
-	$n = sizeof($pool);
+    $pool = is_array($iterable) ? $iterable : iterator_to_array(iter($iterable));
+    $n = sizeof($pool);
 
-	if (!$n && $r) {
-		return;
-	}
+    if (!$n && $r) {
+        return;
+    }
 
-	$indices = array_fill(0, $r, 0);
-	yield array_slice($pool, 0, $r);
+    $indices = array_fill(0, $r, 0);
+    yield array_slice($pool, 0, $r);
 
-	for (;;) {
-		for (;;) {
-			for ($i = $r - 1; $i >= 0; $i--) {
-				if ($indices[$i] != $n - 1) {
-					break 2;
-				}
-			}
+    for (;;) {
+        for (;;) {
+            for ($i = $r - 1; $i >= 0; $i--) {
+                if ($indices[$i] != $n - 1) {
+                    break 2;
+                }
+            }
 
-			return;
-		}
+            return;
+        }
 
-		array_splice($indices, $i, sizeof($indices), array_fill(0, $r - $i, $indices[$i] + 1));
+        array_splice($indices, $i, sizeof($indices), array_fill(0, $r - $i, $indices[$i] + 1));
 
-		$row = [];
-		foreach ($indices as $i) {
-			$row[] = $pool[$i];
-		}
+        $row = [];
+        foreach ($indices as $i) {
+            $row[] = $pool[$i];
+        }
 
-		yield $row;
-	}
+        yield $row;
+    }
 }
 
 function compress($data, $selectors)
@@ -261,13 +264,13 @@ function ifilterfalse(callable $predicate = null, $iterable)
 
 function imap(callable $function = null, ...$iterables)
 {
-	foreach (izip(...$iterables) as $args) {
-		if ($function === null) {
-			yield $args;
-		} else {
-			yield $function(...$args);
-		}
-	}
+    foreach (izip(...$iterables) as $args) {
+        if ($function === null) {
+            yield $args;
+        } else {
+            yield $function(...$args);
+        }
+    }
 }
 
 function islice($iterable, ...$args)
@@ -297,12 +300,12 @@ function islice($iterable, ...$args)
 
 function izip(...$iterables)
 {
-	$multipleIterator = new \MultipleIterator();
-	foreach ($iterables as $iterable) {
-		$multipleIterator->attachIterator(iter($iterable));
-	}
+    $multipleIterator = new \MultipleIterator();
+    foreach ($iterables as $iterable) {
+        $multipleIterator->attachIterator(iter($iterable));
+    }
 
-	return $multipleIterator;
+    return $multipleIterator;
 }
 
 function izip_longest(/* ...$iterables[, $fillvalue] */ ...$args)
@@ -311,80 +314,79 @@ function izip_longest(/* ...$iterables[, $fillvalue] */ ...$args)
     $counter   = sizeof($args);
     $iterables = array_map('iter', $args);
 
-	$sentinel = function() use (&$counter, $fillvalue) {
-		$counter--;
-		yield $fillvalue;
-	};
+    $sentinel = function () use (&$counter, $fillvalue) {
+        $counter--;
+        yield $fillvalue;
+    };
 
-	$fillers = repeat($fillvalue);
+    $fillers = repeat($fillvalue);
 
-	$iterators = array_map(function ($it) use ($sentinel, $fillers) {
-		return chain($it, $sentinel(), $fillers);
-	}, $iterables);
+    $iterators = array_map(function ($it) use ($sentinel, $fillers) {
+        return chain($it, $sentinel(), $fillers);
+    }, $iterables);
 
+    for (;;) {
+        $row = [];
+        foreach ($iterators as $iterator) {
+            if (!$iterator->valid()) {
+                return;
+            }
 
-	for (;;) {
-		$row = [];
-		foreach ($iterators as $iterator) {
-			if (!$iterator->valid()) {
-				return;
-			}
+            $row[] = $iterator->current();
+            $iterator->next();
+        }
 
-			$row[] = $iterator->current();
-			$iterator->next();
-		}
+        yield $row;
 
-		yield $row;
-
-		if (!$counter) {
-			return;
-		}
-	}
+        if (!$counter) {
+            return;
+        }
+    }
 }
 
 function permutations($iterable, $r = null)
 {
-	$pool = is_array($iterable) ? $iterable : iterator_to_array(iter($iterable));
-	$n = sizeof($pool);
-	$r = $r === null ? $n : $r;
+    $pool = is_array($iterable) ? $iterable : iterator_to_array(iter($iterable));
+    $n = sizeof($pool);
+    $r = $r === null ? $n : $r;
 
-	if ($r > $n) {
-		return;
-	}
+    if ($r > $n) {
+        return;
+    }
 
-	$indices = range(0, $n - 1);
-	$cycles  = range($n, $n - $r - 1, -1);
+    $indices = range(0, $n - 1);
+    $cycles  = range($n, $n - $r - 1, -1);
 
-	yield array_slice($pool, 0, $r);
+    yield array_slice($pool, 0, $r);
 
-	while ($n) {
-		for (;;) {
-			for ($i = $r - 1; $i >= 0; $i--) {
-				$cycles[$i]--;
-				$exit = false;
+    while ($n) {
+        for (;;) {
+            for ($i = $r - 1; $i >= 0; $i--) {
+                $cycles[$i]--;
+                $exit = false;
 
-				if ($cycles[$i] === 0) {
-					$indices[] = array_splice($indices, $i, 1)[0];
-					$cycles[$i] = $n - $i;
-				} else {
-					$j = $cycles[$i];
-					$minus_j = sizeof($indices) - $j;
+                if ($cycles[$i] === 0) {
+                    $indices[] = array_splice($indices, $i, 1)[0];
+                    $cycles[$i] = $n - $i;
+                } else {
+                    $j = $cycles[$i];
+                    $minus_j = sizeof($indices) - $j;
 
-					list($indices[$i], $indices[$minus_j]) = [$indices[$minus_j], $indices[$i]];
+                    list($indices[$i], $indices[$minus_j]) = [$indices[$minus_j], $indices[$i]];
 
-					$row = [];
-					for ($i = 0; $i<$r; $i++) {
-						$row[] = $pool[$indices[$i]];
-					}
+                    $row = [];
+                    for ($i = 0; $i < $r; $i++) {
+                        $row[] = $pool[$indices[$i]];
+                    }
 
-					yield $row;
-					break 2;
-				}
-			}
+                    yield $row;
+                    break 2;
+                }
+            }
 
-			return;
-		}
-	}
+            return;
+        }
+    }
 }
 
 function product(/*...$iterables[, $repeat]*/ ...$args)
@@ -445,16 +447,16 @@ function takewhile(callable $predicate, $iterable)
 
 function tee($iterable, $n = 2)
 {
-	$it = new \CachingIterator(iter($iterable), \CachingIterator::FULL_CACHE);
-	$result = [$it];
+    $it = new \CachingIterator(iter($iterable), \CachingIterator::FULL_CACHE);
+    $result = [$it];
 
-	for ($i = 1; $i<$n; $i++) {
-		$result[] = call_user_func(function() use ($it) {
-			foreach ($it->getCache() as $key => $value) {
-				yield $key => $value;
-			}		
-		});
-	}
+    for ($i = 1; $i < $n; $i++) {
+        $result[] = call_user_func(function () use ($it) {
+            foreach ($it->getCache() as $key => $value) {
+                yield $key => $value;
+            }
+        });
+    }
 
-	return $result;
+    return $result;
 }
