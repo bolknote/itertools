@@ -56,7 +56,7 @@ function iter($var)
 
 function xrange($start_or_stop, $stop = PHP_INT_MAX, $step = 1)
 {
-    $args = call_user_func_array(__NAMESPACE__.'\\slice', func_get_args());
+    $args = slice(...func_get_args());
 
     if ($args->step == 0) {
         throw new \InvalidArgumentException('xrange() arg 3 must not be zero');
