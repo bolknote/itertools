@@ -4,8 +4,9 @@
 Реализованы все функции, для запуска требуется PHP 5.6 и выше.
 
 Пример использования:
+
 ```php
-require 'itertools.php';
+require 'Itertools.php';
 use function itertools\islice, itertools\cycle;
 
 foreach (islice(cycle('ABC'), 10) as $element) {
