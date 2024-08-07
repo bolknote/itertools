@@ -166,4 +166,12 @@ final class ItertoolsTest extends TestCase
         $result = it::batched('ABCDEFG', 3);
         $this->assertEquals([['A','B','C'], ['D','E','F'], ['G']], iterator_to_array($result));
     }
+
+    public function testChain_from_iterable(): void
+    {
+        $result = it::chain_from_iterable(['ABC', 'DEF']);
+        $this->assertEquals(['A', 'B', 'C', 'D', 'E', 'F'], iterator_to_array($result));
+        $result = it::chain_from_iterable('ABCDEF');
+        $this->assertEquals(['A', 'B', 'C', 'D', 'E', 'F'], iterator_to_array($result));
+    }
 }

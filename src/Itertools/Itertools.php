@@ -508,4 +508,13 @@ class Itertools
             }
         }
     }
+
+    public static function chain_from_iterable(string|iterable $iterables): Generator
+    {
+        foreach (self::iter($iterables) as $iterable) {
+            foreach (self::iter($iterable) as $item) {
+                yield $item;
+            }
+        }
+    }
 }
