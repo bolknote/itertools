@@ -464,4 +464,48 @@ class Itertools
 
         return $result;
     }
+
+    public static function accumulate(string|iterable $iterable, callable $function = null, int $initial = null): Generator
+    {
+        $function ??= static fn($a, $b) => $a + $b;
+        $iterator = self::iter($iterable);
+        $total = $initial;
+
+        if ($initial === null) {
+            if ($iterator->valid()) {
+                $total = $iterator->current();
+                $iterator->next();
+            } else {
+                return;
+            }
+        }
+
+        yield $total;
+
+        while ($iterator->valid()) {
+            $total = $function($total, $iterator->current());
+            $iterator->next();
+            yield $total;
+        }
+    }
+
+    public static function batched(string|iterable $iterable, int $n): Generator
+    {
+        if ($n < 1) {
+            throw new InvalidArgumentException("n must be at least one");
+        }
+
+        $iterator = self::iter($iterable);
+        while ($iterator->valid()) {
+            $batch = [];
+            for ($i = 0; $i < $n && $iterator->valid(); $i++) {
+                $batch[] = $iterator->current();
+                $iterator->next();
+            }
+
+            if ($batch) {
+                yield $batch;
+            }
+        }
+    }
 }

@@ -150,4 +150,20 @@ final class ItertoolsTest extends TestCase
         $this->assertEquals([1, 2, 3], iterator_to_array($it1));
         $this->assertEquals([1, 2, 3], iterator_to_array($it2));
     }
+
+    public function testAccumulate(): void
+    {
+        $result = it::accumulate([1,2,3,4,5]);
+        $this->assertEquals([1, 3, 6, 10, 15], iterator_to_array($result));
+        $result = it::accumulate([1,2,3,4,5], initial: 100);
+        $this->assertEquals([100, 101, 103, 106, 110, 115], iterator_to_array($result));
+        $result = it::accumulate([3, 4, 6, 2, 1, 9, 0, 7, 5, 8], max(...));
+        $this->assertEquals([3, 4, 6, 6, 6, 9, 9, 9, 9, 9], iterator_to_array($result));
+    }
+
+    public function testBatched(): void
+    {
+        $result = it::batched('ABCDEFG', 3);
+        $this->assertEquals([['A','B','C'], ['D','E','F'], ['G']], iterator_to_array($result));
+    }
 }
