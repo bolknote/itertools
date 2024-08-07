@@ -1,9 +1,10 @@
 # itertools
-«Честная» (основанная на генераторах PHP 5.5) реализация пакета [itertools Пайтона](https://docs.python.org/2/library/itertools.html).
 
-Реализованы все функции, для запуска требуется PHP 8.1 и выше.
+"Fair" (based on PHP 5.5 generators) implementation of the [Python itertools](https://docs.python.org/3/library/itertools.html) module.
 
-Пример использования:
+All functions are implemented; PHP 8.1 or higher is required to run.
+
+Usage example:
 
 ```php
 require_once 'src/Itertools/Itertools.php';
@@ -13,4 +14,4 @@ foreach (it::islice(it::cycle('ABC'), 10) as $element) {
     echo $element;
 }
 ```
-По сравнению с пакетом itertools, реализованы стандартные для Пайтона функции `enumerate` и `xrange`.
+Compared to the itertools package, this implementation includes standard Python functions such as `enumerate` and `xrange`.
