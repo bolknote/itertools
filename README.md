@@ -14,4 +14,5 @@ foreach (it::islice(it::cycle('ABC'), 10) as $element) {
     echo $element;
 }
 ```
-Compared to the itertools package, this implementation includes standard Python functions such as `enumerate` and `range`.
+Compared to the itertools package, this implementation includes standard Python functions such as `iter`,
+`enumerate` and `range`.

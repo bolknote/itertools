@@ -174,4 +174,10 @@ final class ItertoolsTest extends TestCase
         $result = it::chain_from_iterable('ABCDEF');
         $this->assertEquals(['A', 'B', 'C', 'D', 'E', 'F'], iterator_to_array($result));
     }
+
+    public function testPairwise(): void
+    {
+        $result = it::pairwise('ABCD');
+        $this->assertEquals([['A','B'], ['B','C'], ['C','D']], iterator_to_array($result));
+    }
 }

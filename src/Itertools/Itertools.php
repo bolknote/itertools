@@ -33,7 +33,7 @@ class Itertools
     }
 
 
-    private static function iter(string|iterable $var): iterable|IteratorIterator|Iterator|ArrayIterator
+    public static function iter(string|iterable $var): iterable|IteratorIterator|Iterator|ArrayIterator
     {
         switch (true) {
             case $var instanceof Iterator:
@@ -508,4 +508,20 @@ class Itertools
             }
         }
     }
+
+    public static function pairwise(string|iterable $iterable): Generator
+    {
+        $iterator = self::iter($iterable);
+
+        $a = $iterator->current();
+        $iterator->next();
+
+        while ($iterator->valid()) {
+            $b = $iterator->current();
+            yield [$a, $b];
+            $a = $b;
+            $iterator->next();
+        }
+    }
 }
+
