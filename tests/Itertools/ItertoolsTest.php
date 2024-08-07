@@ -15,9 +15,9 @@ final class ItertoolsTest extends TestCase
         $this->assertEquals([[0, 1], [1, 2], [2, 3]], $result);
     }
 
-    public function testXrange(): void
+    public function testRange(): void
     {
-        $result = iterator_to_array(it::xrange(2, 10, 2));
+        $result = iterator_to_array(it::range(2, 10, 2));
         $this->assertEquals([2, 4, 6, 8], $result);
     }
 

@@ -66,12 +66,12 @@ class Itertools
         }
     }
 
-    public static function xrange(int $start_or_stop, int $stop = PHP_INT_MAX, int $step = 1): Generator
+    public static function range(int $start_or_stop, int $stop = PHP_INT_MAX, int $step = 1): Generator
     {
         $args = static::slice(...func_get_args());
 
         if ($args->step === 0) {
-            throw new InvalidArgumentException('xrange() arg 3 must not be zero');
+            throw new InvalidArgumentException('range() arg 3 must not be zero');
         }
 
         if (($args->start > $args->stop && $args->step > 0) || ($args->start < $args->stop && $args->step < 0)) {
@@ -287,7 +287,7 @@ class Itertools
             throw new InvalidArgumentException('Step for islice() must be a positive integer or null.');
         }
 
-        $it = static::xrange(...$args);
+        $it = static::range(...$args);
         if ($it->valid()) {
             $nexti = $it->current();
 
