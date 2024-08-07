@@ -1,15 +1,15 @@
 # itertools
 «Честная» (основанная на генераторах PHP 5.5) реализация пакета [itertools Пайтона](https://docs.python.org/2/library/itertools.html).
 
-Реализованы все функции, для запуска требуется PHP 5.6 и выше.
+Реализованы все функции, для запуска требуется PHP 8.1 и выше.
 
 Пример использования:
 
 ```php
-require 'Itertools.php';
-use function itertools\islice, itertools\cycle;
+require_once 'src/Itertools/Itertools.php';
+use Itertools\Itertools as it;
 
-foreach (islice(cycle('ABC'), 10) as $element) {
+foreach (it::islice(it::cycle('ABC'), 10) as $element) {
     echo $element;
 }
 ```
