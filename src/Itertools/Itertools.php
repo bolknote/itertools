@@ -92,15 +92,6 @@ class Itertools
         }
     }
 
-    public static function from_iterable(string|iterable $iterables): Generator
-    {
-        foreach (static::iter($iterables) as $it) {
-            foreach (static::iter($it) as $element) {
-                yield $element;
-            }
-        }
-    }
-
     public static function combinations(string|iterable $iterable, int $r): Generator
     {
         $pool = is_array($iterable) ? $iterable : iterator_to_array(static::iter($iterable));
