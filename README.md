@@ -13,5 +13,4 @@ foreach (it::islice(it::cycle('ABC'), 10) as $element) {
     echo $element;
 }
 ```
-По сравнению с пакетом itertools, реализованы стандартные для Пайтона функции
-`slice`, `enumerate`, `iter` и `xrange`.
+По сравнению с пакетом itertools, реализованы стандартные для Пайтона функции `enumerate` и `xrange`.
