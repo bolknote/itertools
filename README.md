@@ -2,7 +2,7 @@
 
 "Fair" (based on PHP 5.5 generators) implementation of the [Python itertools](https://docs.python.org/3/library/itertools.html) module.
 
-All functions are implemented; PHP 8.1 or higher is required to run.
+All functions are implemented; PHP 8.4 or higher is required to run.
 
 Usage example:
 

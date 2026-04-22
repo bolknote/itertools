@@ -13,7 +13,7 @@ use IteratorIterator;
 use MultipleIterator;
 use Traversable;
 
-class Itertools
+final readonly class Itertools
 {
     private static function slice(int $start_or_stop, int $stop = PHP_INT_MAX, int $step = 1): object
     {
@@ -35,25 +35,13 @@ class Itertools
 
     public static function iter(string|iterable $var): iterable|IteratorIterator|Iterator|ArrayIterator
     {
-        switch (true) {
-            case $var instanceof Iterator:
-                return $var;
-
-            case $var instanceof Traversable:
-                return new IteratorIterator($var);
-
-            /** @noinspection PhpMissingBreakStatementInspection */
-            case is_string($var):
-                $var = str_split($var);
-            /* fall-through */
-
-            case is_array($var):
-                return new ArrayIterator($var);
-
-            default:
-                $type = gettype($var);
-                throw new InvalidArgumentException("'$type' type is not iterable");
-        }
+        return match (true) {
+            $var instanceof Iterator => $var,
+            $var instanceof Traversable => new IteratorIterator($var),
+            is_string($var) => new ArrayIterator(str_split($var)),
+            is_array($var) => new ArrayIterator($var),
+            default => throw new InvalidArgumentException("'" . gettype($var) . "' type is not iterable"),
+        };
     }
 
     public static function enumerate(string|iterable $iterable, int $start = 0): Generator
@@ -197,7 +185,7 @@ class Itertools
         }
     }
 
-    public static function groupby(string|iterable $iterable, callable $keyfunc = null): Generator
+    public static function groupby(string|iterable $iterable, ?callable $keyfunc = null): Generator
     {
         $keyfunc ??= static fn($x) => $x;
         $iterator = static::iter($iterable);
@@ -237,9 +225,7 @@ class Itertools
 
     public static function ifilter(?callable $predicate, string|iterable $iterable): Generator
     {
-        if ($predicate === null) {
-            $predicate = 'boolval';
-        }
+        $predicate ??= boolval(...);
 
         foreach (static::iter($iterable) as $x) {
             if ($predicate($x)) {
@@ -250,9 +236,7 @@ class Itertools
 
     public static function filterfalse(?callable $predicate, string|iterable $iterable): Generator
     {
-        if ($predicate === null) {
-            $predicate = 'boolval';
-        }
+        $predicate ??= boolval(...);
 
         foreach (static::iter($iterable) as $x) {
             if (!$predicate($x)) {
@@ -261,7 +245,7 @@ class Itertools
         }
     }
 
-    public static function imap(callable $function = null, string|iterable ...$iterables): Generator
+    public static function imap(?callable $function = null, string|iterable ...$iterables): Generator
     {
         foreach (static::izip(...$iterables) as $args) {
             if ($function === null) {
@@ -343,7 +327,7 @@ class Itertools
         }
     }
 
-    public static function permutations(string|iterable $iterable, int $r = null): Generator
+    public static function permutations(string|iterable $iterable, ?int $r = null): Generator
     {
         $pool = is_array($iterable) ? $iterable : iterator_to_array(static::iter($iterable));
         $n = count($pool);
@@ -409,7 +393,7 @@ class Itertools
         yield from $result;
     }
 
-    public static function repeat(mixed $object, int $times = null): Generator
+    public static function repeat(mixed $object, ?int $times = null): Generator
     {
         if ($times === null) {
             for (; ;) {
@@ -422,14 +406,14 @@ class Itertools
         }
     }
 
-    public static function starmap(callable $function, $iterable): Generator
+    public static function starmap(callable $function, string|iterable $iterable): Generator
     {
         foreach (static::iter($iterable) as $args) {
             yield $function(...$args);
         }
     }
 
-    public static function takewhile(callable $predicate, $iterable): Generator
+    public static function takewhile(callable $predicate, string|iterable $iterable): Generator
     {
         foreach (static::iter($iterable) as $x) {
             if ($predicate($x)) {
@@ -447,19 +431,17 @@ class Itertools
 
         for ($i = 1; $i < $n; $i++) {
             $result[] = (static function () use ($it) {
-                foreach ($it->getCache() as $key => $value) {
-                    yield $key => $value;
-                }
+                yield from $it->getCache();
             })();
         }
 
         return $result;
     }
 
-    public static function accumulate(string|iterable $iterable, callable $function = null, int $initial = null): Generator
+    public static function accumulate(string|iterable $iterable, ?callable $function = null, ?int $initial = null): Generator
     {
         $function ??= static fn($a, $b) => $a + $b;
-        $iterator = self::iter($iterable);
+        $iterator = static::iter($iterable);
         $total = $initial;
 
         if ($initial === null) {
@@ -486,7 +468,7 @@ class Itertools
             throw new InvalidArgumentException("n must be at least one");
         }
 
-        $iterator = self::iter($iterable);
+        $iterator = static::iter($iterable);
         while ($iterator->valid()) {
             $batch = [];
             for ($i = 0; $i < $n && $iterator->valid(); $i++) {
@@ -502,8 +484,8 @@ class Itertools
 
     public static function chain_from_iterable(string|iterable $iterables): Generator
     {
-        foreach (self::iter($iterables) as $iterable) {
-            foreach (self::iter($iterable) as $item) {
+        foreach (static::iter($iterables) as $iterable) {
+            foreach (static::iter($iterable) as $item) {
                 yield $item;
             }
         }
@@ -511,7 +493,7 @@ class Itertools
 
     public static function pairwise(string|iterable $iterable): Generator
     {
-        $iterator = self::iter($iterable);
+        $iterator = static::iter($iterable);
 
         $a = $iterator->current();
         $iterator->next();
